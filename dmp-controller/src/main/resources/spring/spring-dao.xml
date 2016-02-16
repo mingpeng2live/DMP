@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<import resource="spring-datasource.xml" /> 
+
+	<bean name="dynamicDatasource" class="com.admaster.dmp.db.DynamicDataSource">
+		<property name="url" value="${jdbc.regUrl}"/>
+		<property name="username" value="${jdbc.regUsername}"/>
+		<property name="password" value="${jdbc.regPassword}"/>
+		<property name="driverClassName" value="${jdbc.reqDriverClassName}"/>
+        <property name="targetDataSources">
+            <map>
+                <entry key="default" value-ref="dataSource"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="dataSource"/>
+    </bean>
+
+ 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dynamicDatasource" />
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"></property>
+		<property name="mapperLocations">
+			<list>
+				<value>classpath*:mybatis/mapper/*.xml</value>
+				<value>classpath*:mybatis/mapper/*/*.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		<property name="basePackage" value="com.admaster.dmp.mapper" />
+	</bean>
+	
+	<!-- 用于无需映射mapper的sql操作 -->
+	<bean id="myBatisDao" class="com.admaster.dmp.db.MybatisDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+</beans>

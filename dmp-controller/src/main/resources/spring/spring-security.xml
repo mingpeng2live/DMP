@@ -1,0 +1,172 @@
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:s="http://www.springframework.org/schema/security"
+	xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    	http://www.springframework.org/schema/security 
+    	http://www.springframework.org/schema/security/spring-security-4.0.xsd
+    	http://www.springframework.org/schema/security/oauth2
+		http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
+	
+	<!-- client -->
+    <bean id="clientDetailsService" class="com.admaster.dmp.oauth2.CustomJdbcClientDetailsService">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+    <bean id="oauth2ClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+        <constructor-arg ref="clientDetailsService"/>
+    </bean>
+    <!-- oauth2请求的认证管理器 -->
+    <s:authentication-manager id="oauth2AuthenticationManager">
+        <s:authentication-provider user-service-ref="oauth2ClientDetailsUserService"/>
+    </s:authentication-manager>
+
+
+	<!-- 将token信息存放数据库 -->
+    <bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+	<!--  如果允许刷新token 请将supportRefreshToken 的值设置为true, 默认为不允许 -->
+    <bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+        <property name="tokenStore" ref="tokenStore"/>
+        <property name="clientDetailsService" ref="clientDetailsService"/>
+        <property name="supportRefreshToken" value="true"/>
+    </bean>
+    
+    
+    <!-- oauth2授权服务配置 start -->
+    <bean id="oAuth2RequestFactory" class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
+        <constructor-arg name="clientDetailsService" ref="clientDetailsService"/>
+    </bean>
+    <!-- OAuth用户认证处理 -->
+    <bean id="oauthUserApprovalHandler" class="com.admaster.dmp.oauth2.OauthUserApprovalHandler">
+        <property name="tokenStore" ref="tokenStore"/>
+        <property name="clientDetailsService" ref="clientDetailsService"/>
+        <property name="requestFactory" ref="oAuth2RequestFactory"/>
+        <property name="oauthService" ref="oauthService"/>
+    </bean>
+	<!-- 授权码处理服务 -->
+    <bean id="jdbcAuthorizationCodeServices" class="org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+    <!-- 授权服务器 -->
+    <oauth2:authorization-server client-details-service-ref="clientDetailsService" token-services-ref="tokenServices"
+        user-approval-handler-ref="oauthUserApprovalHandler" user-approval-page="oauth_approval" error-page="oauth_error">
+        <oauth2:authorization-code authorization-code-services-ref="jdbcAuthorizationCodeServices"/>
+        <oauth2:implicit/>
+        <oauth2:refresh-token/>
+        <oauth2:client-credentials/>
+        <oauth2:password/>
+    </oauth2:authorization-server>
+	<!-- oauth2授权服务配置 end-->
+	
+
+    <!-- common config 用于所有需要授权的http请求配置处理-->
+    <!-- 认证入口点 -->
+    <bean id="oauth2AuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/>
+	<!-- oauth2的授权 访问决策管理器 -->
+    <bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+        <constructor-arg>
+            <list>
+                <bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+                <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+            </list>
+        </constructor-arg>
+    </bean>
+    <!-- 访问拒绝的处理 -->
+    <bean id="oauth2AccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler"/>
+    <!-- common config -->
+
+
+    
+    <!-- 资源filter配置 -->
+    <!--unity resource server filter-->
+    <oauth2:resource-server id="unityResourceServer" resource-id="unity-resource" token-services-ref="tokenServices"/>
+    <!--mobile resource server filter-->
+    <oauth2:resource-server id="mobileResourceServer" resource-id="mobile-resource" token-services-ref="tokenServices"/>
+    <!-- 针对oauth2请求验证是否携带token证书过滤处理 -->
+    <bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+        <property name="authenticationManager" ref="oauth2AuthenticationManager"/>
+    </bean>
+
+
+    <s:debug />
+    <!-- oauth2的授权请求处理 -->
+	<s:http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"
+          entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false">
+        <s:intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>
+        <s:anonymous enabled="false"/>
+        <s:http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>
+        <s:custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>
+        <s:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+        <s:csrf disabled="true"/>
+    </s:http>
+
+
+    <!--unity http configuration-->
+    <s:http pattern="/unity/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint"
+          access-decision-manager-ref="oauth2AccessDecisionManager" use-expressions="false">
+        <s:anonymous enabled="false"/>
+        <s:intercept-url pattern="/unity/**" access="ROLE_UNITY,SCOPE_READ"/>
+        <s:custom-filter ref="unityResourceServer" before="PRE_AUTH_FILTER"/>
+        <s:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+        <s:csrf disabled="true"/>
+    </s:http>
+
+    <!--mobile http configuration-->
+    <s:http pattern="/m/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint"
+          access-decision-manager-ref="oauth2AccessDecisionManager" use-expressions="false">
+        <s:anonymous enabled="false"/>
+        <s:intercept-url pattern="/m/**" access="ROLE_MOBILE,SCOPE_READ"/>
+        <s:custom-filter ref="mobileResourceServer" before="PRE_AUTH_FILTER"/>
+        <s:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+        <s:csrf disabled="true"/>
+    </s:http>
+
+    
+    
+    
+    <s:http disable-url-rewriting="true" use-expressions="false" authentication-manager-ref="authenticationManager">
+        <s:intercept-url pattern="/oauth/**" access="ROLE_USER,ROLE_UNITY,ROLE_MOBILE"/>
+        <s:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <s:form-login authentication-failure-url="/login.jsp?authentication_error=1" 
+        			default-target-url="/index.jsp" login-page="/login.jsp" login-processing-url="/login.do"/>
+        <s:logout logout-success-url="/index.jsp" logout-url="/logout.do"/>
+        <s:access-denied-handler error-page="/login.jsp?authorization_error=2"/>
+        <s:anonymous/>
+        <s:csrf disabled="true"/>
+    </s:http>
+
+	<!-- 认证管理器 -->
+    <s:authentication-manager alias="authenticationManager">
+        <s:authentication-provider user-service-ref="userService">
+            <s:password-encoder hash="bcrypt"/>
+            <!--
+		        rod/koala
+		        dianne/emu
+		        scott/wombat^
+		        peter/opal
+		    -->
+			<!-- <s:user-service>
+                <s:user name="rod" password="$2a$10$75pBjapg4Nl8Pzd.3JRnUe7PDJmk9qBGwNEJDAlA3V.dEJxcDKn5O" authorities="admin, user, teller" />
+                <s:user name="dianne" password="$2a$04$bCMEyxrdF/7sgfUiUJ6Ose2vh9DAMaVBldS1Bw2fhi1jgutZrr9zm" authorities="user,teller" />
+                <s:user name="scott" password="$2a$06$eChwvzAu3TSexnC3ynw4LOSw1qiEbtNItNeYv5uI40w1i3paoSfLu" authorities="user" />
+                <s:user name="peter" password="$2a$04$8.H8bCMROLF4CIgd7IpeQ.tcBXLP5w8iplO0n.kCIkISwrIgX28Ii" authorities="user" />
+            </s:user-service> -->
+        </s:authentication-provider>
+    </s:authentication-manager>
+	
+ 
+ 	
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+</beans>

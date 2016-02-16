@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"
+	default-lazy-init="true">
+
+	<context:component-scan base-package="com.admaster.dmp.*">
+		<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation" />
+	</context:component-scan>
+	
+	<context:property-placeholder location="classpath:config.properties"/>
+
+	<!-- jackson json化返回结果 -->
+	<bean id="jacksonResponse" class="com.admaster.dmp.rest.Jackson2HttpMessageConverter">
+		<property name="objectMapper">
+			<bean class="com.fasterxml.jackson.databind.ObjectMapper">
+				<!-- <property name="serializationInclusion">
+					<value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
+				</property> -->
+			</bean>
+		</property>
+	</bean>
+	<!-- 请求映射处理适配器 -->
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="jacksonResponse"/>
+			</list>
+		</property>
+	</bean>
+	<!-- 异常处理器 -->
+	<bean id="exceptionResolver" class="com.admaster.dmp.exception.BaseHandlerExceptionResolver"> 
+		<property name="stackTrace" value="${stackTrace}"/>
+		<property name="messageConverters">
+			<list>
+				<ref bean="jacksonResponse"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="1048576000" />
+		<property name="maxInMemorySize" value="4096" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	<mvc:interceptors>
+        <!--国际化资源切换（根据请求参数中的locale参数自动切换）-->
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />  
+    </mvc:interceptors>
+
+	<!-- 激活annotation功能 -->
+	<mvc:annotation-driven />
+
+
+</beans>
