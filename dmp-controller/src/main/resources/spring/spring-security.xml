@@ -10,20 +10,23 @@
     	http://www.springframework.org/schema/security/oauth2
 		http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
 	
-	<!-- client -->
-    <bean id="clientDetailsService" class="com.admaster.dmp.oauth2.CustomJdbcClientDetailsService">
+	<!-- client，客户端应用 -->
+    <bean id="clientDetailsService" class="com.pm.dmp.oauth2.CustomJdbcClientDetailsService">
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
     <bean id="oauth2ClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
         <constructor-arg ref="clientDetailsService"/>
     </bean>
-    <!-- oauth2请求的认证管理器 -->
+    <!-- oauth2请求的认证管理器，专门处理客户端应用的 此标签对应类org.springframework.security.authentication.ProviderManager -->
     <s:authentication-manager id="oauth2AuthenticationManager">
         <s:authentication-provider user-service-ref="oauth2ClientDetailsUserService"/>
     </s:authentication-manager>
+	<!-- 针对客户端oauth2请求验证是否携带token证书过滤处理 -->
+    <bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+        <property name="authenticationManager" ref="oauth2AuthenticationManager"/>
+    </bean>
 
-
-	<!-- 将token信息存放数据库 -->
+	<!-- 将token信息数据库操作 -->
     <bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
@@ -40,17 +43,17 @@
         <constructor-arg name="clientDetailsService" ref="clientDetailsService"/>
     </bean>
     <!-- OAuth用户认证处理 -->
-    <bean id="oauthUserApprovalHandler" class="com.admaster.dmp.oauth2.OauthUserApprovalHandler">
+    <bean id="oauthUserApprovalHandler" class="com.pm.dmp.oauth2.OauthUserApprovalHandler">
         <property name="tokenStore" ref="tokenStore"/>
         <property name="clientDetailsService" ref="clientDetailsService"/>
         <property name="requestFactory" ref="oAuth2RequestFactory"/>
         <property name="oauthService" ref="oauthService"/>
     </bean>
-	<!-- 授权码处理服务 -->
+	<!-- 授权码授权方式处理服务 -->
     <bean id="jdbcAuthorizationCodeServices" class="org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices">
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
-    <!-- 授权服务器 -->
+    <!-- 授权服务器，包含多种授权方式 -->
     <oauth2:authorization-server client-details-service-ref="clientDetailsService" token-services-ref="tokenServices"
         user-approval-handler-ref="oauthUserApprovalHandler" user-approval-page="oauth_approval" error-page="oauth_error">
         <oauth2:authorization-code authorization-code-services-ref="jdbcAuthorizationCodeServices"/>
@@ -63,9 +66,9 @@
 	
 
     <!-- common config 用于所有需要授权的http请求配置处理-->
-    <!-- 认证入口点 -->
+    <!-- 认证失败处理 -->
     <bean id="oauth2AuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/>
-	<!-- oauth2的授权 访问决策管理器 -->
+	<!-- 访问控制决策管理器，用于判断请求是否有权限 -->
     <bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
         <constructor-arg>
             <list>
@@ -86,13 +89,10 @@
     <oauth2:resource-server id="unityResourceServer" resource-id="unity-resource" token-services-ref="tokenServices"/>
     <!--mobile resource server filter-->
     <oauth2:resource-server id="mobileResourceServer" resource-id="mobile-resource" token-services-ref="tokenServices"/>
-    <!-- 针对oauth2请求验证是否携带token证书过滤处理 -->
-    <bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
-        <property name="authenticationManager" ref="oauth2AuthenticationManager"/>
-    </bean>
 
 
     <s:debug />
+    <!-- FilterSecurityInterceptor -->
     <!-- oauth2的授权请求处理 -->
 	<s:http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"
           entry-point-ref="oauth2AuthenticationEntryPoint" use-expressions="false">
@@ -139,7 +139,7 @@
         <s:csrf disabled="true"/>
     </s:http>
 
-	<!-- 认证管理器 -->
+	<!-- 认证管理器，实现用户认证的入口 -->
     <s:authentication-manager alias="authenticationManager">
         <s:authentication-provider user-service-ref="userService">
             <s:password-encoder hash="bcrypt"/>

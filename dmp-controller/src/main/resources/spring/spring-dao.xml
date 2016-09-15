@@ -8,7 +8,7 @@
 
 	<import resource="spring-datasource.xml" /> 
 
-	<bean name="dynamicDatasource" class="com.admaster.dmp.db.DynamicDataSource">
+	<bean name="dynamicDatasource" class="com.pm.dmp.db.DynamicDataSource">
 		<property name="url" value="${jdbc.regUrl}"/>
 		<property name="username" value="${jdbc.regUsername}"/>
 		<property name="password" value="${jdbc.regPassword}"/>
@@ -34,11 +34,11 @@
 
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
 		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-		<property name="basePackage" value="com.admaster.dmp.mapper" />
+		<property name="basePackage" value="com.pm.dmp.mapper" />
 	</bean>
 	
 	<!-- 用于无需映射mapper的sql操作 -->
-	<bean id="myBatisDao" class="com.admaster.dmp.db.MybatisDao">
+	<bean id="myBatisDao" class="com.pm.dmp.db.MybatisDao">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
 	</bean>
 

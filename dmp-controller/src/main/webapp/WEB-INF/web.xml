@@ -45,6 +45,25 @@
 	</filter-mapping>
 	
 	<!-- Spring Security -->
+	<!-- 
+		该过滤器初始化时，会根据该filtername 去spring容器中获取过滤代理对象delegate，而得到的类型对象是FilterChainProxy
+		{
+			查看该方法 HttpSecurityBeanDefinitionParser.registerFilterChainProxyIfNecessary 在初始化FilterChainProxy bean 定义时
+			会判断spring bean定义容器中是否存在该对象，如果存在就返回，否则初始化该bean定义。
+			初始化bean定义时 该bean的构造参数设置了一个 BeanIds.FILTER_CHAINS [类型ListFactoryBean] 的引用。
+		}
+		
+		如果spring安全配置文件中配置多个http标签，根据上面的解释只会有一个FilterChainProxy生成，
+		而它只是一层代理，通过匹配filterChains list属性中的SecurityFilterChain
+		{
+			SecurityFilterChain [实现类DefaultSecurityFilterChain]类型，此类型针对每个http标签都会产生一个对象
+			查看该方法 HttpSecurityBeanDefinitionParser.createFilterChain 创建完DefaultSecurityFilterChain该定义bean的时候
+			在parse方法中添加到一个 BeanIds.FILTER_CHAINS 名称的bean中。
+			所以spring容器初始化时会用 BeanIds.FILTER_CHAINS 命名的bean 通过FilterChainProxy的构造方法注入其中。
+		}
+		获得对应的filter【这里的filter就是spring安全配置的filter】
+		交给它的内部类VirtualFilterChain 去执行。
+	-->
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>

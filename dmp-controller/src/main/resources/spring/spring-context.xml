@@ -12,14 +12,14 @@
         http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"
 	default-lazy-init="true">
 
-	<context:component-scan base-package="com.admaster.dmp.*">
+	<context:component-scan base-package="com.pm.dmp.*">
 		<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
 	<context:property-placeholder location="classpath:config.properties"/>
 
 	<!-- jackson json化返回结果 -->
-	<bean id="jacksonResponse" class="com.admaster.dmp.rest.Jackson2HttpMessageConverter">
+	<bean id="jacksonResponse" class="com.pm.dmp.rest.Jackson2HttpMessageConverter">
 		<property name="objectMapper">
 			<bean class="com.fasterxml.jackson.databind.ObjectMapper">
 				<!-- <property name="serializationInclusion">
@@ -37,7 +37,7 @@
 		</property>
 	</bean>
 	<!-- 异常处理器 -->
-	<bean id="exceptionResolver" class="com.admaster.dmp.exception.BaseHandlerExceptionResolver"> 
+	<bean id="exceptionResolver" class="com.pm.dmp.exception.BaseHandlerExceptionResolver"> 
 		<property name="stackTrace" value="${stackTrace}"/>
 		<property name="messageConverters">
 			<list>

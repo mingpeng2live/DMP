@@ -29,7 +29,7 @@
 	<import resource="spring-dao.xml" />
 	<import resource="spring-security.xml"/>
 
-	<context:component-scan base-package="com.admaster.dmp.*"></context:component-scan>
+	<context:component-scan base-package="com.pm.dmp.*"></context:component-scan>
 	
 	<!-- 事物管理对象配置, 事物切面配置 暂不支持分布式事务-->
 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -47,7 +47,7 @@
 		</tx:attributes>
 	</tx:advice>
 	<aop:config>
-		<aop:pointcut id="testPointcut" expression="execution(* com.admaster.dmp.service.**.*Service.*(..))" />
+		<aop:pointcut id="testPointcut" expression="execution(* com.pm.dmp.service.**.*Service.*(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="testPointcut" />
 	</aop:config>
 

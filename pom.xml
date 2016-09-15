@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.admaster</groupId>
+	<groupId>com.pm</groupId>
 	<artifactId>dmp</artifactId>
 	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
@@ -14,17 +14,17 @@
 	</modules>
 
 	<distributionManagement>
-		<repository>
-			<id>conf</id>
-			<name>conf-releases</name>
-			<url>http://repo.admaster.co/artifactory/components-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>conf</id>
-			<name>conf-snapshots</name>
-			<url>http://repo.admaster.co/artifactory/components-local</url>
-		</snapshotRepository>
-	</distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Nexus</name>
+            <url>http://10.20.22.137:8091/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Nexus</name>
+            <url>http://10.20.22.137:8091/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -141,10 +141,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -176,6 +176,11 @@
 					<tagNameFormat>dmp_v@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
+			<plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
 		</plugins>
 		<resources>
 			<resource>
