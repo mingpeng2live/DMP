@@ -76,7 +76,7 @@
 	<!-- 自定义filter -->
 	<filter>
 		<filter-name>req</filter-name>
-		<filter-class>com.admaster.dmp.filter.ReqFilter</filter-class>
+		<filter-class>com.pm.dmp.filter.ReqFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>req</filter-name>

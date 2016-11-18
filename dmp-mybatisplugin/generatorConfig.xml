@@ -7,20 +7,20 @@
 	<context id="dmp" targetRuntime="MyBatis3" >
 		<property name="javaFileEncoding" value="UTF-8" />
 
-		<plugin type="com.admaster.mybatis.plugin.ClientExamplePluginAdapter" />
+		<plugin type="com.pm.mybatis.plugin.ClientExamplePluginAdapter" />
 		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
 		<!-- 取消注释 -->
-		<commentGenerator type="com.admaster.mybatis.plugin.CommentGeneratorPlugin">
+		<commentGenerator type="com.pm.mybatis.plugin.CommentGeneratorPlugin">
 			<property name="suppressDate" value="true" />
 			<!-- <property name="suppressAllComments" value="true" /> -->
 		</commentGenerator>
 
 		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
-			connectionURL="jdbc:mysql://192.168.10.16:3306/dev_dmp" userId="admaster"
+			connectionURL="jdbc:mysql://192.168.10.16:3306/dev_dmp" userId="pm"
 			password="adm@sterDmp!23" />
 
 		<!-- 实体对象路径 -->
-		<javaModelGenerator targetPackage="com.admaster.dmp.domain.platform" 
+		<javaModelGenerator targetPackage="com.pm.dmp.domain.platform" 
 			targetProject="../dmp-service/src/main/java">
 			<property name="enableSubPackages" value="true" />
 			<property name="trimStrings" value="true" />
@@ -31,7 +31,7 @@
 			targetProject="../dmp-service/src/main/resources"/>
 		
 		<!-- dao接口路径 -->
-		<javaClientGenerator targetPackage="com.admaster.dmp.mapper.platform"
+		<javaClientGenerator targetPackage="com.pm.dmp.mapper.platform"
 			targetProject="../dmp-service/src/main/java" type="XMLMAPPER" />
 
 		<table schema="dev_dmp" tableName="user_role" domainObjectName="UserRole" alias="UserRole">

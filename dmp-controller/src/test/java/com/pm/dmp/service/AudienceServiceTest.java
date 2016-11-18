@@ -74,14 +74,14 @@ public class AudienceServiceTest {
 	public void testSelectByPrimaryKeyDao(){
 //		Map<String, Object> parameterMap = new HashMap<String, Object>();
 //		parameterMap.put("id", 1l);
-//		Audience selectByPrimaryKey = mybatisDao.getSingleRow("com.admaster.dmp.mapper.platform.AudienceMapper.selectByPrimaryKey", parameterMap);
+//		Audience selectByPrimaryKey = mybatisDao.getSingleRow("com.pm.dmp.mapper.platform.AudienceMapper.selectByPrimaryKey", parameterMap);
 //		logger.info(JackSonSerializer.toStringNException(selectByPrimaryKey));
 //		Audience selectByPrimaryKey = mybatisDao.getSingleRow("common.selectByPrimaryKeys", parameterMap);
 //		logger.info(JackSonSerializer.toStringNException(selectByPrimaryKey));
 		
-//		TenantUser user = mybatisDao.getSingleRow("com.admaster.dmp.mapper.platform.TenantUserMapper.selectByUserName", "chenyuanqiang@admaster.com.cn");
+//		TenantUser user = mybatisDao.getSingleRow("com.pm.dmp.mapper.platform.TenantUserMapper.selectByUserName", "chenyuanqiang@pm.com.cn");
 //		logger.info(JackSonSerializer.toStringNException(user));
-		TenantUser user = userMapper.selectByUserName("chenyuanqiang@admaster.com.cn");
+		TenantUser user = userMapper.selectByUserName("chenyuanqiang@pm.com.cn");
 		logger.info(JackSonSerializer.toStringNException(user));
 
 	}

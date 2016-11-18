@@ -6,13 +6,13 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
 	<typeAliases>
-		<typeAlias alias="User" type="com.admaster.dmp.domain.oauth2.User"/>
-        <typeAlias alias="Privilege" type="com.admaster.dmp.enums.Privilege"/>
-        <typeAlias alias="OauthClientDetails" type="com.admaster.dmp.domain.oauth2.OauthClientDetails"/>
+		<typeAlias alias="User" type="com.pm.dmp.domain.oauth2.User"/>
+        <typeAlias alias="Privilege" type="com.pm.dmp.enums.Privilege"/>
+        <typeAlias alias="OauthClientDetails" type="com.pm.dmp.domain.oauth2.OauthClientDetails"/>
 	
-		<typeAlias type="com.admaster.dmp.domain.platform.Audience" alias="Audience" />
-		<typeAlias type="com.admaster.dmp.domain.platform.TenantUser" alias="TenantUser" />
-		<typeAlias type="com.admaster.dmp.domain.platform.Role" alias="Role" />
-		<typeAlias type="com.admaster.dmp.domain.platform.UserRole" alias="UserRole" />
+		<typeAlias type="com.pm.dmp.domain.platform.Audience" alias="Audience" />
+		<typeAlias type="com.pm.dmp.domain.platform.TenantUser" alias="TenantUser" />
+		<typeAlias type="com.pm.dmp.domain.platform.Role" alias="Role" />
+		<typeAlias type="com.pm.dmp.domain.platform.UserRole" alias="UserRole" />
  	</typeAliases>
 </configuration>
